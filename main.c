@@ -22,18 +22,94 @@ and how to print this character by character like example 1.0 below
 #include <ctype.h>
 #include <stdlib.h>
 
-int main(void) {
-   const char *str = "apple";
-   char **collection = (char **)malloc(5*strlen(str)*sizeof(char)+1);
+#define ROWS 5
 
-   collection[0] = "apple";
-   collection[1] = "apple";
-   collection[2] = "apple";
-   collection[3] = "apple";
-   collection[4] = "apple";
+void show(size_t const row, size_t const col, char const ** collection);
 
-   collection[0][0] = 'A';
-   collection[1][1] = 'P';
+/*
+ *  MARK:  main()
+ */
+int main(int argc, char const * argv[]) {
+  const char * str = "apple";
+  size_t const str_sz = strlen(str);
+  char ** collection = malloc(ROWS * sizeof(char *));
+  if (collection == NULL) {
+    fprintf(stderr,
+            "malloc of %d rows of char * failed\n", ROWS);
+    exit(EXIT_FAILURE);
+  }
+  else {
+    printf("malloc allocated %d rows of char *\n", ROWS);
+  }
+  putchar('\n');
 
-   return 0;
+  for (size_t r_ = 0ul; r_ < ROWS; ++r_) {
+    collection[r_] = malloc(str_sz * sizeof(char) + 1);
+    if (collection[r_] == NULL) {
+      fprintf(stderr,
+              "malloc of row[%zu] of %zu char failed\n",
+              r_, str_sz * sizeof(char) + 1);
+      exit(EXIT_FAILURE);
+    }
+    else {
+      printf("allocated %zu chars at %p\n",
+             str_sz * sizeof(char) + 1, collection[r_]);
+    }
+  }
+  putchar('\n');
+
+  for (size_t r_ = 0ul; r_ < ROWS; ++ r_) {
+    printf("%p\n", &collection[r_]);
+  }
+  putchar('\n');
+
+  for (size_t r_ = 0ul; r_ < ROWS; ++r_) {
+    strcpy(collection[r_], str);
+  }
+
+  show(ROWS, str_sz + 1, (char const **) collection);
+  putchar('\n');
+
+  // collection[0][0] = 'A';
+  // collection[1][1] = 'P';
+  // collection[2][2] = 'P';
+  // collection[3][3] = 'L';
+  // collection[4][4] = 'E';
+  collection[0][0] = toupper(collection[0][0]);
+  collection[1][1] = toupper(collection[1][1]);
+  collection[2][2] = toupper(collection[2][2]);
+  collection[3][3] = toupper(collection[3][3]);
+  collection[4][4] = toupper(collection[4][4]);
+
+  show(ROWS, str_sz + 1, (char const **) collection);
+  putchar('\n');
+
+  printf("\nrelease row memory\n");
+  for (size_t r_ = 0ul; r_ < ROWS; ++r_) {
+    free(collection[r_]);
+  }
+  printf("release pointer memory\n");
+  free(collection);
+
+  printf("\ncomplete\n");
+  return EXIT_SUCCESS;
+}
+
+/*
+ *  MARK:  show()
+ */
+void show(size_t const row, size_t const col, char const ** collection) {
+  printf("In function %s(%zu, %zu, %p)\n",
+         __func__, row, col, collection);
+
+  for (size_t r_ = 0ul; r_ < row; ++r_) {
+    for (size_t c_ = 0ul; c_ < col; ++c_) {
+      if (collection[r_][c_] == '\0') {
+        putchar('\n');
+      }
+      else {
+        putchar(collection[r_][c_]);
+      }
+    }
+  }
 }
